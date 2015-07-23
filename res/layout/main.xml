@@ -12,12 +12,12 @@
         <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="车牌号:"
-                android:layout_weight="0.1"
+                android:text="车牌号*:"
+                android:layout_weight="0.2"
                 />
         <EditText android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="川A"
-                android:layout_weight="0.9"
+                android:text="川A19283"
+                android:layout_weight="0.8"
                 android:id="@+id/car_no"/>
 
     </LinearLayout>
@@ -31,11 +31,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="姓    名:"
-                android:layout_weight="0.1"
+                android:layout_weight="0.2"
                 />
         <EditText android:layout_width="wrap_content" android:layout_height="wrap_content"
-                  android:text="张三"
-                  android:layout_weight="0.9"
+                  android:text=""
+                  android:layout_weight="0.8"
                   android:id="@+id/name"/>
 
     </LinearLayout>
@@ -49,11 +49,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="手机号:"
-                android:layout_weight="0.1"
+                android:layout_weight="0.2"
                 />
         <EditText android:layout_width="wrap_content" android:layout_height="wrap_content"
-                  android:text="135xxxxyyyy"
-                  android:layout_weight="0.9"
+                  android:text=""
+                  android:layout_weight="0.8"
                   android:id="@+id/phone_no"/>
 
     </LinearLayout>
@@ -65,12 +65,12 @@
         <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="房    号:"
-                android:layout_weight="0.1"
+                android:text="房    号*:"
+                android:layout_weight="0.2"
                 />
         <EditText android:layout_width="wrap_content" android:layout_height="wrap_content"
-                  android:text="2-1-1202"
-                  android:layout_weight="0.9"
+                  android:text=""
+                  android:layout_weight="0.8"
                   android:id="@+id/house_no"/>
 
     </LinearLayout>
