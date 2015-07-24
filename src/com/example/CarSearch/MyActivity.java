@@ -48,7 +48,6 @@ public class MyActivity extends Activity
 			case HTTP_DO_SEARCH_FINAISHED:
 				String searchResult = (String)msg.obj;
 				showSearchResult(searchResult);
-				//Toast.makeText(MyActivity.this, searchResult, Toast.LENGTH_LONG).show();
 				break;
 			case HTTP_DO_ADD_FINISHED:
 				String addResult = (String)msg.obj;
@@ -70,11 +69,18 @@ public class MyActivity extends Activity
 		}
 		else if(result.indexOf("error") != -1)
 		{
-			Toast.makeText(this, "添加车辆信息失败", Toast.LENGTH_LONG).show();
+			if(result.indexOf("dump") != -1)
+			{
+				Toast.makeText(this, "添加车辆信息失败[重复添加]", Toast.LENGTH_LONG).show();
+			}
+			else
+			{
+				Toast.makeText(this, "添加车辆信息失败:"+result, Toast.LENGTH_LONG).show();
+			}
 		}
 		else
 		{
-			Toast.makeText(this, "添加车辆信息异常", Toast.LENGTH_LONG).show();
+			Toast.makeText(this, "添加车辆信息异常:"+result, Toast.LENGTH_LONG).show();
 		}
 	}
 
@@ -90,7 +96,19 @@ public class MyActivity extends Activity
 
 	protected String getSearchUrl(String baseUrl, String carNo, String houseNo)
 	{
-		String Url = baseUrl + "?carno="+carNo+"&houseno="+houseNo;
+		String Url = baseUrl;
+
+		if(!carNo.isEmpty())
+		{
+			Url = Url + "?carno="+carNo;
+		}
+
+		if(!houseNo.isEmpty())
+		{
+			 Url = Url + "&houseno="+houseNo;
+		}
+
+
 		return Url;
 	}
 
@@ -100,8 +118,8 @@ public class MyActivity extends Activity
 		String result = "";
 		EditText carNo =  (EditText)findViewById(R.id.car_no);
 		EditText houseNo = (EditText)findViewById(R.id.house_no);
-		String strCarNo = carNo.getText().toString();
-		String strHouseNo = houseNo.getText().toString();
+		String strCarNo = carNo.getText().toString().trim();
+		String strHouseNo = houseNo.getText().toString().trim();
 		if(strCarNo.isEmpty() && strHouseNo.isEmpty())
 		{
 			Toast.makeText(this, "关键信息[车牌号/房号]填写不完整", Toast.LENGTH_LONG).show();
@@ -149,12 +167,17 @@ public class MyActivity extends Activity
 
 	protected void showSearchResult(String result)
 	{
+		ArrayList<HashMap<String, String>> searchContent = new  ArrayList<HashMap<String, String>>();
+		ListView lv = (ListView) findViewById(R.id.lst_result);
 		if(result.indexOf("error") != -1)
 		{
+			lv.setAdapter(new SimpleAdapter(this, searchContent, R.layout.list_view_item,
+			                                new String[]{"id", "carno", "ownername", "phoneno", "houseno"},
+			                                new int[]{R.id.id, R.id.carno, R.id.ownername, R.id.phoneno, R.id.houseno}));
 			Toast.makeText(this, "未查找到对应的信息", Toast.LENGTH_LONG).show();
 			return;
 		}
-		ArrayList<HashMap<String, String>> searchContent = new  ArrayList<HashMap<String, String>>();
+
 		JsonReader reader = new JsonReader(new StringReader(result));
 		try
 		{
@@ -183,7 +206,6 @@ public class MyActivity extends Activity
 					if(searchContent.size() > 0)
 					{
 						Toast.makeText(this, "查找到"+searchContent.size() + " 条记录", Toast.LENGTH_LONG).show();
-						ListView lv = (ListView) findViewById(R.id.lst_result);
 						if(lv != null)
 						{
 							lv.setAdapter(new SimpleAdapter(this, searchContent, R.layout.list_view_item,
@@ -196,7 +218,7 @@ public class MyActivity extends Activity
 				}
 				else
 				{
-					Toast.makeText(this, "解析数据失败", Toast.LENGTH_LONG).show();
+					Toast.makeText(this, "解析数据失败:"+key, Toast.LENGTH_LONG).show();
 					return;
 				}
 			}
@@ -219,26 +241,27 @@ public class MyActivity extends Activity
 		EditText name = (EditText)findViewById(R.id.name);
 		EditText phoneNo = (EditText)findViewById(R.id.phone_no);
 		EditText houseNo = (EditText)findViewById(R.id.house_no);
-
-
 		JSONObject obj = new JSONObject();
 		try
 		{
-			obj.put("carno", carNo.getText().toString().toUpperCase());
-			if(!name.getText().toString().isEmpty())
+			obj.put("carno", carNo.getText().toString().trim().toUpperCase());
+
+			if(!name.getText().toString().trim().isEmpty())
 			{
-				obj.put("name", name.getText().toString());
+				obj.put("name", name.getText().toString().trim());
 			}
 
 			if(!phoneNo.getText().toString().isEmpty())
 			{
-				obj.put("phoneno", phoneNo.getText().toString());
+				obj.put("phoneno", phoneNo.getText().toString().trim());
 			}
-			obj.put("houseno", houseNo.getText().toString());
+			obj.put("houseno", houseNo.getText().toString().trim());
+
 			return obj.toString();
 		}
 		catch (JSONException e)
 		{
+			Toast.makeText(this, "提交信息获取异常", Toast.LENGTH_LONG).show();
 			e.printStackTrace();
 		}
 
@@ -249,11 +272,19 @@ public class MyActivity extends Activity
 	{
 		EditText carNo =  (EditText)findViewById(R.id.car_no);
 		EditText houseNo = (EditText)findViewById(R.id.house_no);
-		if(carNo.getText().toString().isEmpty() && houseNo.getText().toString().isEmpty())
+		EditText phoneNo = (EditText)findViewById(R.id.phone_no);
+		if(carNo.getText().toString().isEmpty() || houseNo.getText().toString().isEmpty())
 		{
 			Toast.makeText(this, "提交的信息[车牌号/房号]不全", Toast.LENGTH_LONG).show();
 			return;
 		}
+
+		if(phoneNo.getText().toString().isEmpty())
+		{
+			Toast.makeText(this, "提交的信息[手机号]不全", Toast.LENGTH_LONG).show();
+			return;
+		}
+
 		String postData = getPostData();
 		doAdd(postData);
 	}
@@ -274,12 +305,20 @@ public class MyActivity extends Activity
 					Request request = new Request.Builder().url(url).post(body).build();
 					Response response = mHttpClient.newCall(request).execute();
 					result = response.body().string();
+					if(result.isEmpty())
+					{
+						result = "{'error':'网络异常'}";
+					}
 					Message msg = mHttpHandler.obtainMessage(HTTP_DO_ADD_FINISHED, result);
 					mHttpHandler.sendMessage(msg);
 				}
 				catch (IOException e)
 				{
 					utils.log("add data exception: "+ e.getMessage());
+					result = e.getMessage();
+					result += "网络异常";
+					Message msg = mHttpHandler.obtainMessage(HTTP_DO_ADD_FINISHED, result);
+					mHttpHandler.sendMessage(msg);
 					e.printStackTrace();
 				}
 			}
