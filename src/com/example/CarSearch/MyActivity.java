@@ -97,15 +97,23 @@ public class MyActivity extends Activity
 	protected String getSearchUrl(String baseUrl, String carNo, String houseNo)
 	{
 		String Url = baseUrl;
-
+		boolean hasCarNo = false;
 		if(!carNo.isEmpty())
 		{
 			Url = Url + "?carno="+carNo;
+			hasCarNo = true;
 		}
 
 		if(!houseNo.isEmpty())
 		{
-			 Url = Url + "&houseno="+houseNo;
+			if(hasCarNo)
+			{
+			    Url = Url + "&houseno="+houseNo;
+			}
+			else
+			{
+				Url = Url + "?houseno="+houseNo;
+			}
 		}
 
 
@@ -117,17 +125,26 @@ public class MyActivity extends Activity
 		String url = mServerAddr +"/search";
 		String result = "";
 		EditText carNo =  (EditText)findViewById(R.id.car_no);
+
+		EditText dongNo = (EditText)findViewById(R.id.dong_no);
+		EditText danyuanNo = (EditText)findViewById(R.id.danyuan_no);
 		EditText houseNo = (EditText)findViewById(R.id.house_no);
-		String strCarNo = carNo.getText().toString().trim();
+
+		String strDongNo = dongNo.getText().toString().trim();
+		String strDanyuanNo = danyuanNo.getText().toString().trim();
 		String strHouseNo = houseNo.getText().toString().trim();
-		if(strCarNo.isEmpty() && strHouseNo.isEmpty())
+		String strCarNo = carNo.getText().toString().trim();
+
+		if(strCarNo.isEmpty() && !isValidHouseno(strDongNo, strDanyuanNo, strHouseNo))
 		{
 			Toast.makeText(this, "关键信息[车牌号/房号]填写不完整", Toast.LENGTH_LONG).show();
 			return;
 		}
 		utils.log("carno is " + strCarNo + " houseno is "+strHouseNo);
 
-		String Url = getSearchUrl(url,strCarNo, strHouseNo);
+		String house = strDongNo + "-" + strDanyuanNo + "-"+strHouseNo;
+
+		String Url = getSearchUrl(url,strCarNo, house);
 
 		utils.log("final url is " + Url);
 		doSearch(Url);
@@ -169,7 +186,7 @@ public class MyActivity extends Activity
 	{
 		ArrayList<HashMap<String, String>> searchContent = new  ArrayList<HashMap<String, String>>();
 		ListView lv = (ListView) findViewById(R.id.lst_result);
-		if(result.indexOf("error") != -1)
+		if(result.indexOf("error") != -1 || result.isEmpty())
 		{
 			lv.setAdapter(new SimpleAdapter(this, searchContent, R.layout.list_view_item,
 			                                new String[]{"id", "carno", "ownername", "phoneno", "houseno"},
@@ -177,6 +194,7 @@ public class MyActivity extends Activity
 			Toast.makeText(this, "未查找到对应的信息", Toast.LENGTH_LONG).show();
 			return;
 		}
+
 
 		JsonReader reader = new JsonReader(new StringReader(result));
 		try
@@ -239,8 +257,14 @@ public class MyActivity extends Activity
 	{
 		EditText carNo =  (EditText)findViewById(R.id.car_no);
 		EditText name = (EditText)findViewById(R.id.name);
-		EditText phoneNo = (EditText)findViewById(R.id.phone_no);
+		EditText dongNo = (EditText)findViewById(R.id.dong_no);
+		EditText danyuanNo = (EditText)findViewById(R.id.danyuan_no);
 		EditText houseNo = (EditText)findViewById(R.id.house_no);
+
+		String house = dongNo.getText().toString().trim() + "-" + danyuanNo.getText().toString().trim() + "-" + houseNo.getText().toString().trim();
+
+		EditText phoneNo = (EditText)findViewById(R.id.phone_no);
+
 		JSONObject obj = new JSONObject();
 		try
 		{
@@ -255,7 +279,7 @@ public class MyActivity extends Activity
 			{
 				obj.put("phoneno", phoneNo.getText().toString().trim());
 			}
-			obj.put("houseno", houseNo.getText().toString().trim());
+			obj.put("houseno", house);
 
 			return obj.toString();
 		}
@@ -271,8 +295,15 @@ public class MyActivity extends Activity
 	public void onAdd(View view)
 	{
 		EditText carNo =  (EditText)findViewById(R.id.car_no);
-		EditText houseNo = (EditText)findViewById(R.id.house_no);
 		EditText phoneNo = (EditText)findViewById(R.id.phone_no);
+
+		EditText dongNo = (EditText)findViewById(R.id.dong_no);
+		EditText danyuanNo = (EditText)findViewById(R.id.danyuan_no);
+		EditText houseNo = (EditText)findViewById(R.id.house_no);
+
+		String house = dongNo.getText().toString().trim() + "-" + danyuanNo.getText().toString().trim() + "-" + houseNo.getText().toString().trim();
+
+
 		if(carNo.getText().toString().isEmpty() || houseNo.getText().toString().isEmpty())
 		{
 			Toast.makeText(this, "提交的信息[车牌号/房号]不全", Toast.LENGTH_LONG).show();
@@ -284,9 +315,55 @@ public class MyActivity extends Activity
 			Toast.makeText(this, "提交的信息[手机号]不全", Toast.LENGTH_LONG).show();
 			return;
 		}
+		if(!isValidHouseno(dongNo.getText().toString(), danyuanNo.getText().toString(), houseNo.getText().toString()))
+		{
+			return;
+		}
 
 		String postData = getPostData();
 		doAdd(postData);
+	}
+
+
+	protected boolean isValidHouseno(String dongNo, String danyuanNo, String houseNo)
+	{
+		String strDongNo = dongNo.trim();
+		String strDanyuanNo = danyuanNo.trim();
+		String strHouseno = houseNo.trim();
+
+		if(dongNo.isEmpty() || danyuanNo.isEmpty() || houseNo.isEmpty())
+		{
+			Toast.makeText(this, "房号不正确", Toast.LENGTH_LONG).show();
+			return false;
+		}
+
+		if(strDongNo.charAt(0) < '1' || strDongNo.charAt(0) > '5')
+		{
+			Toast.makeText(this, "栋数不正确", Toast.LENGTH_LONG).show();
+			return false;
+		}
+		char danyuanhao = strDanyuanNo.charAt(0);
+		if(danyuanhao != '1')
+		{
+			Toast.makeText(this, "单元号不正确", Toast.LENGTH_LONG).show();
+			return false;
+		}
+
+		if(strHouseno.length() > 4)
+		{
+			Toast.makeText(this, "房号不正确", Toast.LENGTH_LONG).show();
+			return false;
+		}
+		else if (strHouseno.length() < 3)
+		{
+			Toast.makeText(this, "房号不正确,房号太小", Toast.LENGTH_LONG).show();
+			return false;
+		}
+		else
+		{
+			return true;
+		}
+
 	}
 
 	protected void doAdd(String data)
