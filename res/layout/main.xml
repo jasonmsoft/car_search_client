@@ -7,7 +7,7 @@
 
     <LinearLayout android:layout_width="fill_parent" android:layout_height="wrap_content">
       <TextView android:layout_width="fill_parent" android:layout_height="wrap_content"
-                android:text="【说明】打*号的为必填内容，可以通过【车牌号/房号】来查询!,若查询出来，显示为【null】，则说明此部分信息没有录入，房号请按照【2-1-15XX】格式录入!"
+                android:text="【说明】打*号的为必填内容，可以通过【车牌号/房号】来查询!,若查询出来，显示为【null】，则说明此部分信息没有录入，房号请按照【2.1.15XX】格式录入!"
                 android:background="#00ee00"
                 android:textColor="#ff0000"/>
     </LinearLayout>
