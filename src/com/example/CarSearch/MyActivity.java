@@ -32,8 +32,8 @@ public class MyActivity extends Activity
 	 * Called when the activity is first created.
 	 */
 
-	//private final String mServerAddr = "http://115.47.47.252:8889";
-	private final String mServerAddr = "http://10.28.163.92:8889";
+	private final String mServerAddr = "http://115.47.48.252:8889";
+	//private final String mServerAddr = "http://10.28.163.92:8889";
 	private OkHttpClient mHttpClient = new OkHttpClient();
 	private final int HTTP_DO_SEARCH_FINAISHED = 1;
 	private final int HTTP_DO_ADD_FINISHED = 2;
@@ -94,7 +94,7 @@ public class MyActivity extends Activity
 
 
 
-	protected String getSearchUrl(String baseUrl, String carNo, String houseNo)
+	protected String getSearchUrl(String baseUrl, String carNo, String dongNo, String danyuanNo, String houseNo)
 	{
 		String Url = baseUrl;
 		boolean hasCarNo = false;
@@ -104,7 +104,7 @@ public class MyActivity extends Activity
 			hasCarNo = true;
 		}
 
-		if(!houseNo.isEmpty())
+		if(!houseNo.isEmpty() && !danyuanNo.isEmpty() && !dongNo.isEmpty())
 		{
 			if(hasCarNo)
 			{
@@ -144,7 +144,7 @@ public class MyActivity extends Activity
 
 		String house = strDongNo + "-" + strDanyuanNo + "-"+strHouseNo;
 
-		String Url = getSearchUrl(url,strCarNo, house);
+		String Url = getSearchUrl(url,strCarNo, strDongNo, strDanyuanNo, strHouseNo);
 
 		utils.log("final url is " + Url);
 		doSearch(Url);
