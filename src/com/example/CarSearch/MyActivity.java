@@ -376,6 +376,7 @@ public class MyActivity extends Activity
 				MediaType mediatype = MediaType.parse("application/json;charset=utf-8");
 				String url = mServerAddr + "/add";
 				String result = "";
+				String test = "111";
 				try
 				{
 					RequestBody body = RequestBody.create(mediatype, data);
